@@ -1,0 +1,1400 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AK AI Video Studio</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --green:#00ff88;
+    --green2:#00c96b;
+    --bg:#020604;
+    --border:#173526;
+    --text:#effff5;
+    --muted:#71867a;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 50% -10%,rgba(0,255,136,.18),transparent 42%),
+        radial-gradient(circle at 100% 100%,rgba(0,180,100,.08),transparent 35%),
+        var(--bg);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    padding:18px 12px;
+}
+
+.container{
+    width:min(1100px,100%);
+    margin:auto;
+}
+
+.header{
+    text-align:center;
+    padding:20px 0 28px;
+}
+
+.logo{
+    width:76px;
+    height:76px;
+    margin:auto;
+    border-radius:23px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    color:#02170b;
+    font-size:28px;
+    font-weight:1000;
+    letter-spacing:-2px;
+    box-shadow:0 0 55px rgba(0,255,136,.18);
+}
+
+.brand{
+    margin-top:15px;
+    font-size:clamp(32px,7vw,55px);
+    font-weight:950;
+    letter-spacing:-2px;
+}
+
+.brand span{
+    color:var(--green);
+}
+
+.subtitle{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:14px;
+}
+
+.card{
+    background:linear-gradient(
+        180deg,
+        rgba(10,20,13,.97),
+        rgba(5,12,8,.97)
+    );
+    border:1px solid rgba(0,255,136,.14);
+    border-radius:24px;
+    padding:20px;
+    box-shadow:0 30px 100px rgba(0,0,0,.48);
+}
+
+.section{
+    margin-bottom:20px;
+}
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    font-size:14px;
+    font-weight:900;
+}
+
+.badge{
+    color:#02170b;
+    background:var(--green);
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:10px;
+    font-weight:900;
+}
+
+.prompt{
+    width:100%;
+    min-height:190px;
+    resize:vertical;
+    padding:17px;
+    background:#020503;
+    color:#dffff0;
+    border:1px solid var(--border);
+    border-radius:15px;
+    outline:none;
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:15px;
+    line-height:1.6;
+}
+
+.prompt:focus{
+    border-color:var(--green);
+    box-shadow:0 0 0 3px rgba(0,255,136,.06);
+}
+
+.prompt::placeholder{
+    color:#405247;
+}
+
+.characters{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.character{
+    min-height:180px;
+    border:1px dashed #244735;
+    border-radius:15px;
+    background:#030805;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.character:hover{
+    border-color:var(--green);
+    transform:translateY(-2px);
+}
+
+.character input{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:pointer;
+    z-index:5;
+}
+
+.character-icon{
+    font-size:38px;
+    margin-bottom:8px;
+}
+
+.character-name{
+    font-size:13px;
+    color:#a9c4b3;
+    text-align:center;
+    padding:0 8px;
+}
+
+.preview{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:none;
+    z-index:2;
+    pointer-events:none;
+}
+
+.character.has-image .character-icon,
+.character.has-image .character-name{
+    display:none;
+}
+
+.character.has-image .preview{
+    display:block;
+}
+
+.remove-image{
+    display:none;
+    position:absolute;
+    right:8px;
+    top:8px;
+    z-index:20;
+    width:32px;
+    height:32px;
+    border:0;
+    border-radius:50%;
+    background:rgba(0,0,0,.8);
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.character.has-image .remove-image{
+    display:block;
+}
+
+.settings{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+}
+
+select{
+    width:100%;
+    height:50px;
+    padding:0 12px;
+    border-radius:12px;
+    background:#020503;
+    border:1px solid var(--border);
+    color:#dffff0;
+    outline:none;
+    cursor:pointer;
+}
+
+select:focus{
+    border-color:var(--green);
+}
+
+.duration-fixed{
+    width:100%;
+    height:50px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:#020503;
+    border:1px solid var(--border);
+    color:var(--green);
+    font-weight:900;
+}
+
+.generate{
+    width:100%;
+    height:58px;
+    border:0;
+    border-radius:14px;
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    color:#02170b;
+    font-size:17px;
+    font-weight:950;
+    cursor:pointer;
+    box-shadow:0 12px 40px rgba(0,255,136,.12);
+    transition:.2s;
+}
+
+.generate:hover{
+    transform:translateY(-2px);
+}
+
+.generate:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    transform:none;
+}
+
+.status{
+    display:none;
+    margin-top:18px;
+    padding:17px;
+    border-radius:14px;
+    background:#030905;
+    border:1px solid #183a29;
+    text-align:center;
+}
+
+.loader{
+    width:42px;
+    height:42px;
+    margin:0 auto 12px;
+    border:4px solid #163423;
+    border-top-color:var(--green);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.status-title{
+    color:var(--green);
+    font-weight:900;
+}
+
+.status-text{
+    color:var(--muted);
+    margin-top:6px;
+    font-size:13px;
+}
+
+.result{
+    display:none;
+    margin-top:20px;
+    padding:17px;
+    background:#030905;
+    border:1px solid #183a29;
+    border-radius:16px;
+}
+
+.result h2{
+    color:var(--green);
+    font-size:17px;
+    margin-bottom:12px;
+}
+
+.video-box{
+    width:100%;
+    aspect-ratio:9 / 16;
+    max-height:75vh;
+    border-radius:14px;
+    background:#010302;
+    border:1px solid #14291d;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+
+.video-box video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:none;
+}
+
+.fake-result{
+    text-align:center;
+    color:#65796d;
+    padding:40px 15px;
+}
+
+.download{
+    width:100%;
+    margin-top:10px;
+    height:48px;
+    border-radius:11px;
+    border:1px solid var(--border);
+    background:#09130d;
+    color:#dcf5e5;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.download:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+.footer{
+    text-align:center;
+    color:#3e5146;
+    font-size:11px;
+    padding:18px;
+}
+
+@media(max-width:600px){
+    .card{
+        padding:13px;
+    }
+
+    .character{
+        min-height:150px;
+    }
+}
+
+@media(max-width:430px){
+    body{
+        padding:9px 7px;
+    }
+
+    .characters{
+        gap:8px;
+    }
+
+    .prompt{
+        min-height:220px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="header">
+
+    <div class="logo">AK</div>
+
+    <div class="brand">
+        AK <span>AI Video Studio</span>
+    </div>
+
+    <div class="subtitle">
+        Create cinematic 10-second AI videos using character references
+    </div>
+
+</header>
+
+<main class="card">
+
+<section class="section">
+
+    <div class="section-title">
+        <span>Describe Your Video</span>
+        <span class="badge">AI</span>
+    </div>
+
+    <textarea
+        id="prompt"
+        class="prompt"
+        placeholder="Describe exactly what you want...
+
+Example:
+
+A cinematic story about a strawberry and a banana.
+
+Both characters appear together in the same scene.
+
+The strawberry walks into an old house at night.
+The banana follows him.
+
+Both characters interact naturally.
+
+Dramatic lighting, emotional expressions,
+realistic camera movement and cinematic atmosphere.
+
+Include dialogue, actions, location,
+camera movement and mood."
+    ></textarea>
+
+</section>
+
+<section class="section">
+
+    <div class="section-title">
+        <span>Character References</span>
+        <span class="badge">2 CHARACTERS</span>
+    </div>
+
+    <div class="characters">
+
+        <label class="character" id="character1">
+
+            <input
+                id="file1"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+            <img
+                id="preview1"
+                class="preview"
+                alt="Character 01"
+            >
+
+            <button
+                type="button"
+                class="remove-image"
+                id="remove1"
+            >
+                ×
+            </button>
+
+            <div class="character-icon">👤</div>
+
+            <div class="character-name">
+                Character 01
+            </div>
+
+        </label>
+
+        <label class="character" id="character2">
+
+            <input
+                id="file2"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+            >
+
+            <img
+                id="preview2"
+                class="preview"
+                alt="Character 02"
+            >
+
+            <button
+                type="button"
+                class="remove-image"
+                id="remove2"
+            >
+                ×
+            </button>
+
+            <div class="character-icon">👤</div>
+
+            <div class="character-name">
+                Character 02
+            </div>
+
+        </label>
+
+    </div>
+
+</section>
+
+<section class="section">
+
+    <div class="section-title">
+        <span>Video Settings</span>
+        <span class="badge">FIXED</span>
+    </div>
+
+    <div class="settings">
+
+        <select id="aspect">
+
+            <option value="9:16" selected>
+                9:16 — Vertical
+            </option>
+
+            <option value="16:9">
+                16:9 — Landscape
+            </option>
+
+        </select>
+
+        <div class="duration-fixed">
+            10 Seconds — Every Scene
+        </div>
+
+    </div>
+
+</section>
+
+<button
+    class="generate"
+    id="generateButton"
+    type="button"
+>
+    Generate 10 Second Video
+</button>
+
+<div id="status" class="status">
+
+    <div class="loader"></div>
+
+    <div class="status-title" id="statusTitle">
+        AI is preparing your video
+    </div>
+
+    <div id="statusText" class="status-text">
+        Analyzing your story...
+    </div>
+
+</div>
+
+<section id="result" class="result">
+
+    <h2>
+        Generated Video — 10 Seconds
+    </h2>
+
+    <div class="video-box">
+
+        <div id="fakeResult" class="fake-result">
+            Your generated video will appear here.
+        </div>
+
+        <video
+            id="resultVideo"
+            controls
+            playsinline
+        ></video>
+
+    </div>
+
+    <button
+        class="download"
+        id="downloadButton"
+        type="button"
+        disabled
+    >
+        Download Video
+    </button>
+
+</section>
+
+</main>
+
+<footer class="footer">
+    AK AI Video Studio • Powered by Runway AI
+</footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ========================================
+   CHARACTER DATA
+======================================== */
+
+const characterImages = [
+    null,
+    null
+];
+
+
+/* ========================================
+   ELEMENTS
+======================================== */
+
+const promptInput =
+    document.getElementById("prompt");
+
+const aspectInput =
+    document.getElementById("aspect");
+
+const generateButton =
+    document.getElementById("generateButton");
+
+const statusBox =
+    document.getElementById("status");
+
+const statusTitle =
+    document.getElementById("statusTitle");
+
+const statusText =
+    document.getElementById("statusText");
+
+const resultBox =
+    document.getElementById("result");
+
+const resultVideo =
+    document.getElementById("resultVideo");
+
+const fakeResult =
+    document.getElementById("fakeResult");
+
+const downloadButton =
+    document.getElementById("downloadButton");
+
+
+/* ========================================
+   LOAD CHARACTER
+======================================== */
+
+function loadCharacter(input, index){
+
+    const file =
+        input.files && input.files[0];
+
+    if(!file){
+        return;
+    }
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+    ];
+
+    if(!allowedTypes.includes(file.type)){
+
+        alert(
+            "Please select a PNG, JPEG, or WEBP image."
+        );
+
+        input.value = "";
+        return;
+    }
+
+    /*
+       Keep image size reasonably small.
+
+       The server allows up to 5MB per image.
+       We use a 4.8MB browser limit to leave
+       some safety margin for the request body.
+    */
+
+    if(file.size > 4.8 * 1024 * 1024){
+
+        alert(
+            "Image must be smaller than 4.8MB."
+        );
+
+        input.value = "";
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload = function(event){
+
+        const dataUri =
+            event.target.result;
+
+        characterImages[index - 1] =
+            dataUri;
+
+        const character =
+            document.getElementById(
+                "character" + index
+            );
+
+        const preview =
+            document.getElementById(
+                "preview" + index
+            );
+
+        preview.src =
+            dataUri;
+
+        character.classList.add(
+            "has-image"
+        );
+    };
+
+    reader.onerror = function(){
+
+        alert(
+            "Could not read this image."
+        );
+
+        input.value = "";
+    };
+
+    reader.readAsDataURL(file);
+}
+
+
+/* ========================================
+   REMOVE CHARACTER
+======================================== */
+
+function removeCharacter(
+    event,
+    index
+){
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    characterImages[index - 1] =
+        null;
+
+    const input =
+        document.getElementById(
+            "file" + index
+        );
+
+    const preview =
+        document.getElementById(
+            "preview" + index
+        );
+
+    const character =
+        document.getElementById(
+            "character" + index
+        );
+
+    input.value = "";
+    preview.src = "";
+
+    character.classList.remove(
+        "has-image"
+    );
+}
+
+
+/* ========================================
+   FILE INPUT EVENTS
+======================================== */
+
+document
+    .getElementById("file1")
+    .addEventListener(
+        "change",
+        function(){
+
+            loadCharacter(
+                this,
+                1
+            );
+
+        }
+    );
+
+document
+    .getElementById("file2")
+    .addEventListener(
+        "change",
+        function(){
+
+            loadCharacter(
+                this,
+                2
+            );
+
+        }
+    );
+
+
+/* ========================================
+   REMOVE BUTTON EVENTS
+======================================== */
+
+document
+    .getElementById("remove1")
+    .addEventListener(
+        "click",
+        function(event){
+
+            removeCharacter(
+                event,
+                1
+            );
+
+        }
+    );
+
+document
+    .getElementById("remove2")
+    .addEventListener(
+        "click",
+        function(event){
+
+            removeCharacter(
+                event,
+                2
+            );
+
+        }
+    );
+
+
+/* ========================================
+   STATUS
+======================================== */
+
+function showStatus(
+    title,
+    message
+){
+
+    statusBox.style.display =
+        "block";
+
+    statusTitle.textContent =
+        title;
+
+    statusText.textContent =
+        message;
+}
+
+
+function hideStatus(){
+
+    statusBox.style.display =
+        "none";
+}
+
+
+/* ========================================
+   GENERATE VIDEO
+======================================== */
+
+async function generateVideo(){
+
+    const prompt =
+        promptInput.value.trim();
+
+    const aspect =
+        aspectInput.value;
+
+    if(!prompt){
+
+        alert(
+            "Please describe your video first."
+        );
+
+        promptInput.focus();
+
+        return;
+    }
+
+    /*
+       Disable button immediately so
+       the same request cannot be sent twice.
+    */
+
+    generateButton.disabled =
+        true;
+
+    generateButton.textContent =
+        "Starting AI Generation...";
+
+    resultBox.style.display =
+        "none";
+
+    resultVideo.pause();
+    resultVideo.removeAttribute("src");
+    resultVideo.load();
+
+    fakeResult.style.display =
+        "block";
+
+    downloadButton.disabled =
+        true;
+
+    try{
+
+        showStatus(
+            "AI is preparing your video",
+            "Sending your story and character references..."
+        );
+
+        /*
+           IMPORTANT:
+           The server expects:
+           
+           {
+               prompt: "...",
+               aspect: "9:16",
+               images: [...]
+           }
+        */
+
+        const images =
+            characterImages.filter(
+                image => Boolean(image)
+            );
+
+        const response =
+            await fetch(
+                "/api/generate",
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        prompt:prompt,
+
+                        aspect:aspect,
+
+                        images:images
+
+                    })
+                }
+            );
+
+        const data =
+            await readJsonResponse(
+                response
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                "The server could not start video generation."
+            );
+        }
+
+        if(
+            !data.success ||
+            !data.taskId
+        ){
+
+            throw new Error(
+                data.error ||
+                "The server did not return a valid task ID."
+            );
+        }
+
+        showStatus(
+            "AI is generating your video",
+            "Task started successfully. Please wait..."
+        );
+
+        await waitForVideo(
+            data.taskId
+        );
+
+    }catch(error){
+
+        console.error(
+            "Generation error:",
+            error
+        );
+
+        showStatus(
+            "Generation failed",
+            error.message ||
+            "Something went wrong."
+        );
+
+        generateButton.disabled =
+            false;
+
+        generateButton.textContent =
+            "Generate 10 Second Video";
+    }
+}
+
+
+/* ========================================
+   READ JSON RESPONSE
+======================================== */
+
+async function readJsonResponse(
+    response
+){
+
+    const text =
+        await response.text();
+
+    if(!text){
+
+        return {};
+    }
+
+    try{
+
+        return JSON.parse(
+            text
+        );
+
+    }catch{
+
+        return {
+            error:
+                text
+        };
+    }
+}
+
+
+/* ========================================
+   WAIT FOR VIDEO
+======================================== */
+
+async function waitForVideo(
+    taskId
+){
+
+    /*
+       Runway tasks can take time.
+       Poll every 5 seconds.
+    */
+
+    const maxAttempts =
+        120;
+
+    for(
+        let attempt = 1;
+        attempt <= maxAttempts;
+        attempt++
+    ){
+
+        const elapsedMinutes =
+            Math.floor(
+                ((attempt - 1) * 5) / 60
+            );
+
+        showStatus(
+            "AI is generating your video",
+            elapsedMinutes > 0
+                ? `Rendering your 10-second video... ${elapsedMinutes} min`
+                : "Rendering your 10-second video..."
+        );
+
+        let response;
+
+        try{
+
+            response =
+                await fetch(
+                    "/api/status/" +
+                    encodeURIComponent(taskId),
+                    {
+                        method:"GET",
+                        cache:"no-store"
+                    }
+                );
+
+        }catch(error){
+
+            /*
+               Temporary network problem:
+               wait and try again.
+            */
+
+            await sleep(5000);
+
+            continue;
+        }
+
+        const data =
+            await readJsonResponse(
+                response
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                data.error ||
+                data.message ||
+                "Could not check video status."
+            );
+        }
+
+        /*
+           SUCCESS
+        */
+
+        if(
+            data.success &&
+            data.videoUrl
+        ){
+
+            showVideo(
+                data.videoUrl
+            );
+
+            return;
+        }
+
+        /*
+           FAILED
+        */
+
+        if(
+            data.status === "FAILED" ||
+            data.success === false &&
+            data.error
+        ){
+
+            throw new Error(
+                data.error ||
+                "Runway video generation failed."
+            );
+        }
+
+        /*
+           CANCELLED
+        */
+
+        if(
+            data.status === "CANCELLED"
+        ){
+
+            throw new Error(
+                "Video generation was cancelled."
+            );
+        }
+
+        /*
+           Continue polling.
+        */
+
+        await sleep(5000);
+    }
+
+    throw new Error(
+        "Video generation is taking too long. Please check the task again later."
+    );
+}
+
+
+/* ========================================
+   SHOW VIDEO
+======================================== */
+
+function showVideo(
+    videoUrl
+){
+
+    hideStatus();
+
+    resultBox.style.display =
+        "block";
+
+    fakeResult.style.display =
+        "none";
+
+    resultVideo.src =
+        videoUrl;
+
+    resultVideo.style.display =
+        "block";
+
+    resultVideo.load();
+
+    downloadButton.disabled =
+        false;
+
+    downloadButton.dataset.url =
+        videoUrl;
+
+    generateButton.disabled =
+        false;
+
+    generateButton.textContent =
+        "Generate Another Video";
+
+    resultBox.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+}
+
+
+/* ========================================
+   DOWNLOAD
+======================================== */
+
+async function downloadResult(){
+
+    const url =
+        downloadButton.dataset.url;
+
+    if(!url){
+        return;
+    }
+
+    try{
+
+        downloadButton.disabled =
+            true;
+
+        downloadButton.textContent =
+            "Preparing Download...";
+
+        /*
+           Try to download the video
+           directly as a Blob.
+        */
+
+        const response =
+            await fetch(
+                url
+            );
+
+        if(!response.ok){
+
+            throw new Error(
+                "Could not download the video."
+            );
+        }
+
+        const blob =
+            await response.blob();
+
+        const blobUrl =
+            URL.createObjectURL(
+                blob
+            );
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href =
+            blobUrl;
+
+        link.download =
+            "ak-ai-video.mp4";
+
+        document.body.appendChild(
+            link
+        );
+
+        link.click();
+
+        link.remove();
+
+        setTimeout(
+            function(){
+
+                URL.revokeObjectURL(
+                    blobUrl
+                );
+
+            },
+            1000
+        );
+
+    }catch(error){
+
+        /*
+           Some video hosts block browser
+           downloads because of CORS.
+           In that case open the video URL.
+        */
+
+        console.warn(
+            "Direct download failed:",
+            error
+        );
+
+        window.open(
+            url,
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+    }finally{
+
+        downloadButton.disabled =
+            false;
+
+        downloadButton.textContent =
+            "Download Video";
+    }
+}
+
+
+/* ========================================
+   SLEEP
+======================================== */
+
+function sleep(
+    milliseconds
+){
+
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                milliseconds
+            )
+    );
+}
+
+
+/* ========================================
+   PAGE READY
+======================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        console.log(
+            "AK AI Video Studio ready."
+        );
+
+        console.log(
+            "API:",
+            window.location.origin
+        );
+
+    }
+);
+</script>
+
+</body>
+</html>
+```
